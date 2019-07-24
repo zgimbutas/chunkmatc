@@ -1,4 +1,4 @@
-Hypersingular layer evaluation library 
+High order layer potential evaluation library in R^2 
 
 Fortran
 =======
