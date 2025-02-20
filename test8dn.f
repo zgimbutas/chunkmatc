@@ -294,8 +294,8 @@ c       ... add the diagonal term
 c
         call chunkdiag(cmatr,npts,0.0d0)
 
-        if( ifexterior .eq. 0 ) cd=+0.5d0/(ima/4)
-        if( ifexterior .eq. 1 ) cd=-0.5d0/(ima/4)
+        if( ifexterior .eq. 0 ) cd=-0.5d0/(ima/4)
+        if( ifexterior .eq. 1 ) cd=+0.5d0/(ima/4)
         call chunkdiag_cmplx(dmatr,npts,cd)
 c
         ifprec = 1
@@ -481,7 +481,7 @@ c
         z=rk*r
         call hank103(z,h0,h1,ifexpon)
 c
-        cd=h1*rk/r*(dx*xynorms(1,i)+dy*xynorms(2,i))
+        cd=-h1*rk/r*(dx*xynorms(1,i)+dy*xynorms(2,i))
         rhs(i)=cd
  1200   continue
 c        
