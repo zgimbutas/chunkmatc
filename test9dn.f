@@ -492,7 +492,7 @@ c
         z=rk*r
         call hank103(z,h0,h1,ifexpon)
 c
-        cd=h1*rk/r*(dx*xynorms(1,i)+dy*xynorms(2,i))
+        cd=-h1*rk/r*(dx*xynorms(1,i)+dy*xynorms(2,i))
         rhs(i)=cd
  1200   continue
 c        

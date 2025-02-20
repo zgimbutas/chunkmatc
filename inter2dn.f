@@ -126,7 +126,6 @@ c
         complex *16 cout
 c
 c       ... derivative of single layer potential at the target
-c       warning, this routine actually computes -S_0'
 c
         src(1)=srcinfo(1)
         src(2)=srcinfo(2)
@@ -144,7 +143,7 @@ c
         r=sqrt(dx**2+dy**2)
         d=dx*targnorm(1)+dy*targnorm(2)
 c
-        cout=d/r**2
+        cout=-d/r**2
 c
         return
         end
@@ -161,7 +160,6 @@ c
         complex *16 cout
 c
 c       ... derivative of double layer potential at the target
-c       warning, this routine actually computes -D_0'
 c
         src(1)=srcinfo(1)
         src(2)=srcinfo(2)
@@ -185,7 +183,7 @@ c
         d=d+2*(dx*dy)*targnorm(1)*srcnorm(2)
         d=d+2*(dy*dx)*targnorm(2)*srcnorm(1)
 c
-        cout=d/r**4
+        cout=-d/r**4
 c
         return
         end
@@ -281,7 +279,6 @@ c
         data ima/(0.0d0,1.0d0)/
 c
 c       ... derivative of single layer potential at the target
-c       warning, this routine actually computes -S_k'
 c
         src(1)=srcinfo(1)
         src(2)=srcinfo(2)
@@ -303,7 +300,7 @@ c
         call hank103(z,h0,h1,ifexpon)
 c
         d=dx*targnorm(1)+dy*targnorm(2)
-        cout=d*zk*h1/r
+        cout=-d*zk*h1/r
 c
         return
         end
@@ -322,7 +319,6 @@ c
         data ima/(0.0d0,1.0d0)/
 c
 c       ... derivative of double layer potential at the target
-c       warning, this routine actually computes -D_k'
 c
         src(1)=srcinfo(1)
         src(2)=srcinfo(2)
@@ -371,7 +367,7 @@ c
         cd=cd+(2*h1-r*h0*zk)*(dx*dy)*targnorm(1)*srcnorm(2)
         cd=cd+(2*h1-r*h0*zk)*(dy*dx)*targnorm(2)*srcnorm(1)
 c
-        cout=cd*zk/r**3
+        cout=-cd*zk/r**3
 c
         return
         end
