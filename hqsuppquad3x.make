@@ -21,14 +21,12 @@ include make.inc
 
 # SOURCE FILE LIST
 #
-vpath %.f .:../lib:../geo
+vpath %.f .:../lib
 
 FMODS = 
 
-FSRCS =  test8.f chunkmatc.f inter2dn.f hank103.f \
-           cadavect.f hqsuppquad.f \
-           cgmres6-rel.f \
-           cqrsolve.f \
+FSRCS =  hqsuppquad3x_dr.f hqsuppquad3x.f \
+           cadavect.f adapgauss.f \
 	   legeexps.f prini.f
 
 ifeq ($(WITH_SECOND),1) 

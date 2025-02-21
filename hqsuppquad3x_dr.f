@@ -49,7 +49,7 @@ c
         call funuserini(nsupp,x07)
         call funuser2ini(nsupp,x07)
 c
-        call hqsuppquad(nsupp,inode,xs,ws,nnodes)
+        call hqsuppquad3x(nsupp,inode,xs,ws,nnodes)
 
         m=20
         if( ifquad .eq. 0 ) eps=1d-15
