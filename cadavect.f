@@ -1,5 +1,13 @@
+cc Copyright (C) 2010: Vladimir Rokhlin
+cc 
+cc This software is being released under a modified FreeBSD license
+cc (see COPYING in home directory). 
 c
 c
+cc Copyright (C) 2012: Zydrunas Gimbutas 
+cc 
+cc This software is being released under a modified FreeBSD license
+cc (see COPYING in home directory). 
 c
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

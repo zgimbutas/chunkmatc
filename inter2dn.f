@@ -11,17 +11,6 @@ cc PARTICULAR PURPOSE.  See the GNU General Public License for more
 cc details. You should have received a copy of the GNU General Public 
 cc License along with this program; 
 cc if not, see <http://www.gnu.org/licenses/>.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c    $Date$
-c    $Revision$
-c
-c       
-c     This file contains interaction kernels for the Laplace and
-c     Helmholtz equations in R^2.
-c
-c
-c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c       This is the end of the debugging routines and the beginning of

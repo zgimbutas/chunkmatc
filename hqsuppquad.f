@@ -1,3 +1,9 @@
+cc Copyright (C) 2012: Zydrunas Gimbutas 
+cc 
+cc This software is being released under a modified FreeBSD license
+cc (see COPYING in home directory). 
+c
+c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c       This is the end of the debugging code and the beginning of the
