@@ -1,3 +1,13 @@
+cc Copyright (C) 2012: Zydrunas Gimbutas 
+cc 
+cc This software is being released under a modified FreeBSD license
+cc (see COPYING in home directory). 
+c
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c
+c
         implicit real *8 (a-h,o-z)
         dimension w(90 000 000),xs0(1000),xs(1000),ws(1000),
      $     rints(1000),rints2(1000),errs(1000),
