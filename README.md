@@ -1,8 +1,10 @@
 # High order layer potential evaluation library in R^2 
 
-Date: March 6, 2024
+Author: Zydrunas Gimbutas
 
-Version 0.1
+Date: August 12, 2025
+
+Version 0.2
 
 ### License
 
