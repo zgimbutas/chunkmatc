@@ -18,7 +18,7 @@ c
         subroutine adapgauss(ier,a,b,fun,par1,par2,m,eps,
      1      rint,maxrec,numint)
         implicit real *8 (a-h,o-z)
-        dimension t(100),w(100),stack(400),vals(200),
+        dimension t(100),w(100),stack(400+200),vals(200+100),
      1      par1(*),par2(*)
 c
 c       this subroutine uses the adaptive legendre quadrature

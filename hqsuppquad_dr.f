@@ -53,6 +53,7 @@ c
 c
 c       
         do 5000 inode = 1,nsupp
+        call prinf('inode=*',inode,1)
         x07 = xsupp(inode)
         call prin2('x07=*',x07,1)
 c
@@ -60,6 +61,9 @@ c
         call funuser2ini(nsupp,x07)
 c
         call hqsuppquad(nsupp,inode,xs,ws,nnodes)
+        call prinf('nnodes=*',nnodes,1)
+        call prin2('xs=*',xs,nnodes)
+        call prin2('ws=*',ws,nnodes)
 
         m=20
         if( ifquad .eq. 0 ) eps=1d-15
@@ -67,6 +71,7 @@ c
         if( ifquad .eq. 2 ) eps=1d-18
 c
         do 3000 i=1,nfuns0
+ccc        call prinf('i=*',i,1)
         call adapgauss(ier,ax,bx,fun1,funuser,i,m,eps,
      1      rints(i),maxrec,numint)
  3000   continue
