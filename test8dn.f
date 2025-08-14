@@ -44,7 +44,7 @@ c
 c
         complex *16 cd
 c
-        dimension w(60 000 000)
+        real *8, allocatable :: w(:)
 c
         dimension source(2),target(2)
         complex *16 cpot,cpot0
@@ -63,6 +63,7 @@ c
         pi=4*atan(done)
 c
         lw=60 000 000
+        allocate(w(lw))
 c
 cccc        rk=0.0d0
 cccc        rk=1.0d0*pi
