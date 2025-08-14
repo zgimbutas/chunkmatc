@@ -1,9 +1,16 @@
-cc Copyright (C) 2010: Vladimir Rokhlin
-cc 
+cc Copyright (C) 2014: Vladimir Rokhlin
+cc
 cc This software is being released under a modified FreeBSD license
-cc (see COPYING in home directory). 
-c
-c
+cc (see COPYING in home directory).
+cc
+cc SPDX-License-Identifier: BSD-3-Clause-Modification
+cc
+cc Version 1.1 (Aug 13, 2025), Zydrunas Gimbutas:
+cc Remove unnecessary save statements
+cc Derived from adapgaus.f, which integrates a user-supplied subroutine
+cc Integrate a user-supplied function
+cc Add extra buffer for stack and vals to prevent overflow
+cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c        this is the end of the debugging code and the 
@@ -29,7 +36,7 @@ c                       input parameters:
 c
 c  a,b - the ends of the interval on which the integral is to 
 c       be evaluated
-c  fun - the user-supplied SUBROUTINE to be integrated. the calling
+c  fun - the user-supplied FUNCTION to be integrated. the calling
 c       sequence of fun must be 
 c
 c        fun(x,par1,par2,val).                            (1)

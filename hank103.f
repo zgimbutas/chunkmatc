@@ -1,9 +1,10 @@
-cc Copyright (C) 2010: Vladimir Rokhlin
-cc 
+cc Copyright (C) 2014: Vladimir Rokhlin
+cc
 cc This software is being released under a modified FreeBSD license
-cc (see COPYING in home directory). 
-c
-c
+cc (see COPYING in home directory).
+cc
+cc SPDX-License-Identifier: BSD-3-Clause-Modification
+cc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c
@@ -22,8 +23,8 @@ c
         complex *16 z,hanks(*)
 c
 c       This subroutine evaluates the first n+1 Hankel functions of the
-c       argument z. The user also has the option of evaluating the 
-c       functions H_m(z) scaled by the (complex) coefficient e^{-i \cdot z}. 
+c       argument z. The user also has the option of evaluating the
+c       functions H_m(z) scaled by the (complex) coefficient e^{-i \cdot z}.
 c       This option is provided via the parameter ifexpon (see below)
 c
 c
@@ -35,7 +36,7 @@ c  n - the highest order of any Hankel function to be evaluated
 c  ifexpon - the integer parameter telling the subroutine whether
 c        to calculate the actual values of the hankel functions,
 c        or the values of Hankel functions scaled by e^{-i \cdot z}.
-c        Permitted values: 0 and 1. 
+c        Permitted values: 0 and 1.
 c    ifexpon = 1 will cause the subroutine to evaluate the Hankel functions
 c        honestly
 c    ifexpon = 0 will cause the subroutine to scale the Hankel functions
@@ -74,8 +75,8 @@ c
         complex *16 z,hanks(*),cd,cdd
 c
 c       This subroutine evaluates the first n+1 Hankel functions of the
-c       argument z. The user also has the option of evaluating the 
-c       functions H_m(z) scaled by the (complex) coefficient e^{-i \cdot z}. 
+c       argument z. The user also has the option of evaluating the
+c       functions H_m(z) scaled by the (complex) coefficient e^{-i \cdot z}.
 c       This option is provided via the parameter ifexpon (see below)
 c
 c
@@ -87,7 +88,7 @@ c  n - the highest order of any Hankel function to be evaluated
 c  ifexpon - the integer parameter telling the subroutine whether
 c        to calculate the actual values of the hankel functions,
 c        or the values of Hankel functions scaled by e^{-i \cdot z}.
-c        Permitted values: 0 and 1. 
+c        Permitted values: 0 and 1.
 c    ifexpon = 1 will cause the subroutine to evaluate the Hankel functions
 c        honestly
 c    ifexpon = 0 will cause the subroutine to scale the Hankel functions
@@ -135,19 +136,19 @@ c
 c
 c        this subroutine evaluates the hankel functions H_0^1, H_1^1
 c        for an arbitrary user-specified complex number z. The user
-c        also has the option of evaluating the functions h0, h1 
-c        scaled by the (complex) coefficient e^{-i \cdot z}. This 
+c        also has the option of evaluating the functions h0, h1
+c        scaled by the (complex) coefficient e^{-i \cdot z}. This
 c        subroutine is a modification of the subroutine hank102
 c        (see), different from the latter by having the parameter
-c        ifexpon. Please note that the subroutine hank102 is in 
+c        ifexpon. Please note that the subroutine hank102 is in
 c        turn a slightly accelerated version of the old hank101
-c        (see). The principal claim to fame of all three is that 
-c        they are valid on the whole  complex plane, and are 
-c        reasonably accurate (14-digit relative accuracy) and 
+c        (see). The principal claim to fame of all three is that
+c        they are valid on the whole  complex plane, and are
+c        reasonably accurate (14-digit relative accuracy) and
 c        reasonably fast. Also, please note that all three have not
-c        been carefully tested in the third quadrant (both x and y 
-c        negative); some sort of numerical trouble is possible 
-c        (though has not been observed) for LARGE z in the third 
+c        been carefully tested in the third quadrant (both x and y
+c        negative); some sort of numerical trouble is possible
+c        (though has not been observed) for LARGE z in the third
 c        quadrant.
 c
 c                      input parameters:
@@ -157,7 +158,7 @@ c        H_0, H_1 are to be evaluated
 c  ifexpon - the integer parameter telling the subroutine whether
 c        to calculate the actual values of the hankel functions,
 c        or the values of Hankel functions scaled by e^{-i \cdot z}.
-c        Permitted values: 0 and 1. 
+c        Permitted values: 0 and 1.
 c    ifexpon = 1 will cause the subroutine to evaluate the Hankel functions
 c        honestly
 c    ifexpon = 0 will cause the subroutine to scale the Hankel functions
@@ -166,8 +167,8 @@ c
 c                      output parameters:
 c
 c  h0, h1 - the said Hankel functions
-c        
-c       
+c
+c
 c        . . . if z in the upper half-plane - act accordingly
 c
         if(imag(z) .lt. 0) goto 1400
@@ -182,7 +183,7 @@ c
         return
  2000 continue
 c
-c       z is in the left lower quadrant. compute 
+c       z is in the left lower quadrant. compute
 c       h0, h1 at the points zu, zr obtained from z by reflection
 c       in the x and y axis, respectively
 c
@@ -192,7 +193,7 @@ c
         call hank103u(zu,ier,h0u,h1u,ifexpon)
         call hank103r(zr,ier,h0r,h1r,ifexpon)
 
-        if(ifexpon .eq. 1) goto 3000    
+        if(ifexpon .eq. 1) goto 3000
 
         subt=abs(imag(zu))
 
@@ -266,9 +267,9 @@ c
 c
 c        this subroutine evaluates the hankel functions H_0^1, H_1^1
 c        for a user-specified complex number z in the upper half-plane.
-c        it is reasonably accurate (14-digit relative accuracy) 
+c        it is reasonably accurate (14-digit relative accuracy)
 c        and reasonably fast.
-c        
+c
 c
 c                      input parameters:
 c
@@ -277,11 +278,11 @@ c        H_0, H_1 are to be evaluated
 c
 c                      output parameters:
 c
-c  ier - error return code. 
+c  ier - error return code.
 c         ier=0 means successful conclusion
 c         ier=4 means that z is not in the upper half-plane
 c  h0, h1 - the said Hankel functions
-c        
+c
         data c0p1/
      1     -.6619836118357782D-12,  -.6619836118612709D-12,
      2     -.7307514264754200D-21,  0.3928160926261892D-10,
@@ -437,8 +438,8 @@ c
         thresh2=3.7**2
         thresh3=20**2
 c
-c       check if if the user-specified z is in one of the 
-c       intermediate regimes 
+c       check if if the user-specified z is in one of the
+c       intermediate regimes
 c
         d=z*dconjg(z)
         if( (d .lt. thresh1) .or. (d .gt. thresh3) ) goto 3000
@@ -449,7 +450,7 @@ c
 c
         if(d .gt. thresh2) goto 2000
 c
-c       z is in the first intermediate regime: its absolute value is 
+c       z is in the first intermediate regime: its absolute value is
 c       between 1 and 3.7. act accordingly
 c
 c       . . . evaluate the expansion
@@ -579,7 +580,7 @@ c
      9     0.9974783533410457D+25,  -.2794294288720121D+28/
 c
 c        evaluate the asymptotic expansion for h0,h1 at
-c        the user-supplied point z, provided it is not 
+c        the user-supplied point z, provided it is not
 c        in the fourth quadrant
 c
         m=10
@@ -595,20 +596,20 @@ c
         do 1600 i=m-1,1,-1
 
         pp=pp* zinv22+p(i)
-        pp1=pp1* zinv22+p1(i) 
+        pp1=pp1* zinv22+p1(i)
 
         qq=qq* zinv22+q(i)
-        qq1=qq1* zinv22+q1(i) 
+        qq1=qq1* zinv22+q1(i)
  1600 continue
 c
         qq=qq*zinv
         qq1=qq1*zinv
 c
         cccexp=1
-        if(ifexpon .eq. 1) cccexp=cdexp(ima*z) 
+        if(ifexpon .eq. 1) cccexp=cdexp(ima*z)
 c
         cdd=cdsqrt(2/pi*zinv)
-c     
+c
         h0=pp+ima*qq
         h0=cdd*cdumb*cccexp * h0
 c
@@ -633,9 +634,9 @@ c
 c
 c        this subroutine evaluates the hankel functions H_0^1, H_1^1
 c        for a user-specified complex number z in the local regime,
-c        i. e. for cdabs(z) < 1 in the upper half-plane, 
-c        and for cdabs(z) < 4 in the lower half-plane, 
-c        it is reasonably accurate (14-digit relative accuracy) and 
+c        i. e. for cdabs(z) < 1 in the upper half-plane,
+c        and for cdabs(z) < 4 in the lower half-plane,
+c        it is reasonably accurate (14-digit relative accuracy) and
 c        reasonably fast.
 c
 c                      input parameters:
@@ -646,8 +647,8 @@ c
 c                      output parameters:
 c
 c  h0, h1 - the said Hankel functions
-c        
-        data cj0/            
+c
+        data cj0/
      1     0.1000000000000000D+01,  -.2500000000000000D+00,
      2     0.1562500000000000D-01,  -.4340277777777778D-03,
      3     0.6781684027777778D-05,  -.6781684027777778D-07,
@@ -693,7 +694,7 @@ c
         y1=0
         z2=z**2
         cd=1
-c        
+c
         do 1800 i=1,m
         fj0=fj0+cj0(i)*cd
         fj1=fj1+cj1(i)*cd
@@ -738,10 +739,10 @@ c
         data ima/(0.0d0,1.0d0)/
 c
 c        this subroutine evaluates the hankel functions H_0^1, H_1^1
-c        for a user-specified complex number z in the right lower 
-c        quadrant. it is reasonably accurate (14-digit relative 
+c        for a user-specified complex number z in the right lower
+c        quadrant. it is reasonably accurate (14-digit relative
 c        accuracy) and reasonably fast.
-c        
+c
 c
 c                      input parameters:
 c
@@ -750,11 +751,11 @@ c        H_0, H_1 are to be evaluated
 c
 c                      output parameters:
 c
-c  ier - error return code. 
+c  ier - error return code.
 c         ier=0 means successful conclusion
 c         ier=4 means that z is not in the right lower quadrant
 c  h0, h1 - the said Hankel functions
-c        
+c
         data c0p1/
      1     -.4268441995428495D-23,  0.4374027848105921D-23,
      2     0.9876152216238049D-23,  -.1065264808278614D-20,
@@ -905,8 +906,8 @@ c
         thresh2=8**2
         thresh3=20**2
 c
-c       check if if the user-specified z is in one of the 
-c       intermediate regimes 
+c       check if if the user-specified z is in one of the
+c       intermediate regimes
 c
         d=z*dconjg(z)
         if( (d .lt. thresh1) .or. (d .gt. thresh3) ) goto 3000
@@ -930,7 +931,7 @@ c
         return
  2000 continue
 c
-c       z is in the second intermediate regime (i.e. its 
+c       z is in the second intermediate regime (i.e. its
 c       absolute value is between 8 and 20). act accordingly.
 c
         cd=done/z

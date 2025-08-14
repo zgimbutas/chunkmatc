@@ -1,9 +1,10 @@
-cc Copyright (C) 2010: Vladimir Rokhlin
-cc 
+cc Copyright (C) 2014: Vladimir Rokhlin
+cc
 cc This software is being released under a modified FreeBSD license
-cc (see COPYING in home directory). 
-c
-c
+cc (see COPYING in home directory).
+cc
+cc SPDX-License-Identifier: BSD-3-Clause-Modification
+cc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c        This is the end of the debugging code and the beginning of the 
@@ -40,6 +41,88 @@ c       QR-decomposition is prepared by a prior call to the subroutine
 c       qrdecom (see); this subroutine has no known uses as a stand-alone 
 c       device. 
 c
+c   cqrinv - uses the QR decomposition obtained via a preceding call
+c       to the subroutine cqrdecom (see) to construct the inverse of
+c       the user-supplied matrix A.
+c
+c
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c
+c
+        subroutine cqrinv(n,b,ainv)
+        implicit complex *16 (a-h,o-z)
+        save
+        dimension b(1),ainv(1)
+c
+c        This subroutine uses the QR decomposition obtained via
+c        a preceding call to the subroutine cqrdecom (see)
+c        to construct the inverse of the user-supplied matrix A.
+c        Please note that the only inputs used by this subroutine
+c        are the dimensionality n of the matrix A, and the array
+c        b thas has been produced during a preceding call to
+c        cqrdecom.
+c
+c
+c
+c                      Input parameters:
+c
+c  n - the dimensionality of the problem
+c  b - the factorization of the matrix a (hopefully) produced via
+c       a preceding call to the subroutine qrdecom (see)
+c
+c                      Output parameters:
+c
+c  ainv - the inverse of the matrix A
+c
+c
+c        . . . construct the memory map
+c
+        ia=1
+        la=n*n+2
+c
+        ib=ia+la
+        lb=n*n+2
+c
+        iz=ib+lb
+        lz=n+2
+c
+c       . . . apply the inverse of the factored matrix to the
+c             right-hand side
+c
+        call cqrinv0(n,b(ia),b(ib),ainv,b(iz) )
+c
+        return
+        end
+
+c
+c
+c
+c
+c
+        subroutine cqrinv0(n,u,b,ainv,z)
+        implicit complex *16 (a-h,o-z)
+        save
+        dimension u(n,n),b(n,n),ainv(n,n),z(1)
+c
+c        construct the inverse of a
+c
+        do 2000 i=1,n
+c
+        do 1200 j=1,n
+        z(j)=b(i,j)
+ 1200 continue
+c
+        call cqrtrin(u,z,n)
+c
+        do 1400 j=1,n
+        ainv(i,j)=z(j)
+ 1400 continue
+c
+ 2000 continue
+        return
+        end
 c
 c
 c
@@ -138,7 +221,7 @@ c
         end
 c
 c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
 c
 c
 c
@@ -146,7 +229,7 @@ c
         implicit complex *16 (a-h,o-z)
         complex *16 a(n,n),u(2,2),aa(2),rhs(1)
 c
-        real *8 dmax,dmin,rcond
+        real *8 dmax,dmin,rcond,size22
 c
 c       This subroutine uses a version of QR-decomposition to solve
 c       the user-supplied system of linear algebraic equations, with 
@@ -176,12 +259,16 @@ c  rcond - a fairly crude estimate of the condition number of a
 c
 c        . . . transpose the input matrix a
 c
+        size22=0
         do 1400 i=1,n
         do 1200 j=1,i
 c
         d=a(j,i)
         a(j,i)=a(i,j)
         a(i,j)=d
+c
+        size22=size22+a(j,i)*conjg(a(j,i))
+        size22=size22+a(i,j)*conjg(a(i,j))
  1200 continue
  1400 continue
 c 
@@ -193,7 +280,7 @@ c
 c
         aa(1)=a(i,j-1)
         aa(2)=a(i,j)
-        call cqrrotfn(aa,u)
+        call cqrrotfn2(aa,u,size22)
 c
         call cqrrotat(u,a(1,j-1),a(1,j),n,i)
 c
@@ -456,7 +543,7 @@ c
         implicit complex *16 (a-h,o-z)
         complex *16 a(n,n),u(2,2),aa(2),b(n,n)
 c
-        real *8 dmax,dmin,rcond
+        real *8 dmax,dmin,rcond,size22
 c
 c       construct the unity matrix
 c
@@ -477,12 +564,16 @@ c
 c
         aa(1)=a(i,j-1)
         aa(2)=a(i,j)
-        call cqrrotfn(aa,u)
+cccc        call cqrrotfn2(aa,u,size22)
+        call cqrrotfn3(aa,u,size22)
+
+
+cccc        call prin2('u=*',u,8)
 c
-        call cqrrotat(u,a(1,j-1),a(1,j),n,i)
+        call cqrrotat2(u,a(1,j-1),a(1,j),n,i)
 c
         ii=j-i
-        call cqrrotat(u,b(1,j-1),b(1,j),n,ii)
+        call cqrrotat2(u,b(1,j-1),b(1,j),n,ii)
  1600 continue
  2000 continue
 c
@@ -502,7 +593,35 @@ c
         endif 
 c
         rcond=dmax/dmin
-c  
+c
+        return
+        end
+c
+c
+c
+c
+c
+        subroutine cqrrotat2(a,x,y,n,n0)
+        implicit complex *16 (a-h,o-z)
+        save
+        complex *16 a(2,2),x(1),y(1),d1,d2
+        real *8 a11,a22
+c
+        a11=a(1,1)
+        a22=a(2,2)
+c
+        do 1200 i=n0,n
+c
+        d1=a11*x(i)+a(1,2)*y(i)
+        d2=a(2,1)*x(i)+a22*y(i)
+c
+cccc        d1=a(1,1)*x(i)+a(1,2)*y(i)
+cccc        d2=a(2,1)*x(i)+a(2,2)*y(i)
+c
+        x(i)=d1
+        y(i)=d2
+ 1200 continue
+c
         return
         end
 c
@@ -513,7 +632,7 @@ c
         subroutine cqrrotat(a,x,y,n,n0)
         implicit complex *16 (a-h,o-z)
         complex *16 a(2,2),x(1),y(1),d1,d2
-c 
+c
         do 1200 i=n0,n
 c
         d1=a(1,1)*x(i)+a(1,2)*y(i)
@@ -530,16 +649,17 @@ c
 c
 c
 c
-        subroutine cqrrotfn(a,u)
+        subroutine cqrrotfn3(a,u,size22)
         implicit complex *16 (a-h,o-z)
         dimension a(2),u(2,2)
-c 
+        real *8 size22,d
+c
         u21=-a(2)
         u22=a(1)
-c 
-        d=sqrt(u22*conjg(u22)+u21*conjg(u21))
 c
-        if(d .eq. 0) then
+        d=u22*conjg(u22)+u21*conjg(u21)
+c
+        if(d .lt. size22*1.0d-66) then
 c
             u(2,2)=1
             u(1,2)=0
@@ -548,9 +668,58 @@ c
             return
         endif
 c
+        d=sqrt(d)
         u(2,2)=u22/d
         u(2,1)=u21/d
+c
+        u(1,1)=-conjg(u(2,2))
+        u(1,2)=conjg(u(2,1))
 
+c
+        if(u(1,1) .ne. 0) then
+            cd=abs(u(1,1))/u(1,1)
+            u(1,1)=u(1,1)*cd
+            u(1,2)=u(1,2)*cd
+        endif
+c
+c
+        if(u(2,2) .ne. 0) then
+            cd=abs(u(2,2))/u(2,2)
+            u(2,1)=u(2,1)*cd
+            u(2,2)=u(2,2)*cd
+        endif
+c
+        return
+        end
+c
+c
+c
+c
+c
+        subroutine cqrrotfn2(a,u,size22)
+        implicit complex *16 (a-h,o-z)
+        save
+        dimension a(2),u(2,2)
+        real *8 size22,d
+c
+        u21=-a(2)
+        u22=a(1)
+c
+        d=u22*conjg(u22)+u21*conjg(u21)
+c
+        if(d .lt. size22*1.0d-66) then
+c
+            u(2,2)=1
+            u(1,2)=0
+            u(1,1)=1
+            u(2,1)=0
+            return
+        endif
+c
+        d=sqrt(d)
+        u(2,2)=u22/d
+        u(2,1)=u21/d
+c
         u(1,1)=-conjg(u(2,2))
         u(1,2)=conjg(u(2,1))
         return
@@ -603,7 +772,7 @@ c
 c
 c
 c
-c 
+c
         subroutine cqrsolve_rand(n,y)
         implicit real *8 (a-h,o-z)
         dimension y(1)
