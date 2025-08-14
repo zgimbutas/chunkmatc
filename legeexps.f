@@ -5,9 +5,9 @@ cc (see COPYING in home directory).
 cc
 cc SPDX-License-Identifier: BSD-3-Clause-Modification
 cc
-cc    Modified August 13, 2025: Zydrunas Gimbutas
-cc    - remove unnecessary save statements
-cc    - in legeexps, use legewhts (previous default) instead of legerts2
+cc Version 1.1 (Aug 13, 2025), Zydrunas Gimbutas:
+cc Remove unnecessary save statements
+cc Use legewhts (previous default) instead of legerts2
 cc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
