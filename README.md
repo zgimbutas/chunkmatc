@@ -62,6 +62,11 @@ cadavect.f - adaptive integration on a segment (smooth functions)
 
 ---
 
+test7.f - Dirichlet solver for the Laplace equation in R^2 (interior),
+          double-layer potential formulation. Put a unit charge outside
+          the circle, solve for the boundary density, compare the
+          direct potential with the layer potential at an interior target.
+
 test8.f - Dirichlet solver for the Helmholtz equation in R^2, first kind
           integral equation. Put a unit charge inside/outside the circle,
           compare the direct potential with the potential produced by
@@ -83,6 +88,18 @@ test9dn.f - Dirichlet solver for the Helmholtz equation in R^2, second kind
           compare the direct potential with the potential produced by
           the solution charge density. Check for the resonances.
 	  Check Dirichlet-Neumann map (requires hypersingular layer evaluation)
+
+
+### Building with f2c+gcc
+
+Each test has optional `*-f2c.make` and `*-f2c-omp.make` makefiles that
+build via the f2c Fortran-to-C translator instead of gfortran:
+
+    make -f test7-f2c-omp.make          # build
+    OMP_NUM_THREADS=8 make -f test7-f2c-omp.make run   # run
+
+Prerequisites: f2c (built at `~/linux/repositories/f2c/src`),
+libf2c.a, gcc-14, MPFR, GMP, libquadmath.
 
 
 Matlab
