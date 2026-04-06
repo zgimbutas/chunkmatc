@@ -94,7 +94,7 @@ c
 c
 c       ... refine the parametrization
 c
-        noversamp=10*2
+        noversamp=10*4
         call genrefineinfo(noversamp,nchunks,
      $     nchunksout,ichunkinfo,refineinfo)
 c
