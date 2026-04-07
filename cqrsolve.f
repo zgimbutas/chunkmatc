@@ -7,39 +7,63 @@ cc SPDX-License-Identifier: BSD-3-Clause-Modification
 cc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c        This is the end of the debugging code and the beginning of the 
+c   Fix history
+c   -----------
+c   2026-04-07  cqrelim: added missing initialization of size22 before
+c               the inner-loop call to cqrrotfn3.  Background: when the
+c               inner call was switched from cqrrotfn2 (which the sister
+c               routine cqrsolv still uses) to cqrrotfn3, the size22
+c               sum-of-squared-moduli setup was dropped.  cqrrotfn3 still
+c               tests  if (d .lt. size22*1.0d-66)  as its degenerate-2-
+c               vector check, so the missing setup left size22 at
+c               whatever happened to be in storage.  Under the F77 de
+c               facto convention of static storage for locals that was
+c               a harmless BSS zero (the branch is d < 0, never true
+c               for a sum of squares).  Under auto storage (f2c -a, as
+c               forced by -fomp) the bug surfaced; with f2c's REAL*32/
+c               REAL*64 (MPFR-backed struct types) uninitialized bytes
+c               reinterpret as huge MPFR values and the degenerate-case
+c               branch fires every iteration, collapsing QR to identity.
+c               Detected with f2c -a -freal-8-real-32 (error 0.247
+c               instead of ~1e-37).  The 1.0d-66 threshold itself is
+c               fine up to quad precision but is not tight at float256/
+c               float512; left as-is for now.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c        This is the end of the debugging code and the beginning of the
 c        linear solver proper
 c
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c
-c        This file contains three user-callable subroutines: cqrsolv, 
-c        cqrdecom, cqrsolve. Following is a brief description of these 
+c        This file contains three user-callable subroutines: cqrsolv,
+c        cqrdecom, cqrsolve. Following is a brief description of these
 c        subroutines.
 c
-c   cqrsolv - uses a version of QR-decomposition to solve the user-supplied 
-c       system of complex linear algebraic equations, with the matrix a and 
-c       right-hand side rhs. Both the matrix a and the right-hand side rhs 
+c   cqrsolv - uses a version of QR-decomposition to solve the user-supplied
+c       system of complex linear algebraic equations, with the matrix a and
+c       right-hand side rhs. Both the matrix a and the right-hand side rhs
 c       are destroyed in the process. This is a primitive, short, and
-c       reasonably efficient subroutine. IMPORTANT NOTE: THIS IS A 
-c       PRIMITIVE ROUTINE IN THAT IT SOLVES THE SYSTEM WITH A SINGLE 
-c       RIGHT-HAND SIDE, AND WILL PERFORM THE QR DECOMPOSITION AGAIN AND 
-c       AGAIN FOR EACH NEW RIGHT-HAND SIDE. IT SHOULD NOT BE USED IN THIS 
-c       REGIME! Instead, the subroutines qrdecom, qrsolve (see) should be 
+c       reasonably efficient subroutine. IMPORTANT NOTE: THIS IS A
+c       PRIMITIVE ROUTINE IN THAT IT SOLVES THE SYSTEM WITH A SINGLE
+c       RIGHT-HAND SIDE, AND WILL PERFORM THE QR DECOMPOSITION AGAIN AND
+c       AGAIN FOR EACH NEW RIGHT-HAND SIDE. IT SHOULD NOT BE USED IN THIS
+c       REGIME! Instead, the subroutines qrdecom, qrsolve (see) should be
 c       used! On the other hand, for a single right-hand side, this routine
 c       is about twice more efficient than the subroutine qrdecom.
 c
 c   cqrdecom - subroutine constructs a QR-decomposition of the real
-c       user-supplied matrix a. It is expected that this decomposition 
-c       will be used by the subroutine qrsolve (see) for the solution 
-c       of linear systems with the matrix a; this subroutine has no 
+c       user-supplied matrix a. It is expected that this decomposition
+c       will be used by the subroutine qrsolve (see) for the solution
+c       of linear systems with the matrix a; this subroutine has no
 c       known uses as a stand-alone device.
 c
-c   cqrsolve  - uses a version of QR-decomposition to solve the 
-c       user-supplied system of linear algebraic equations. The 
-c       QR-decomposition is prepared by a prior call to the subroutine 
-c       qrdecom (see); this subroutine has no known uses as a stand-alone 
-c       device. 
+c   cqrsolve  - uses a version of QR-decomposition to solve the
+c       user-supplied system of linear algebraic equations. The
+c       QR-decomposition is prepared by a prior call to the subroutine
+c       qrdecom (see); this subroutine has no known uses as a stand-alone
+c       device.
 c
 c   cqrinv - uses the QR decomposition obtained via a preceding call
 c       to the subroutine cqrdecom (see) to construct the inverse of
@@ -130,11 +154,12 @@ c
 c
         subroutine cqrcond(n,a,b,rcond,w)
         implicit real *8 (a-h,o-z)
+        save
         complex *16 a(n,n),b(n,n),w(1)
-c  
-c       This subroutine uses a version of QR-decomposition 
-c       (obtained via a preceding call to the subroutine 
-c       cqrdecom) to estimate the condition number of the 
+c
+c       This subroutine uses a version of QR-decomposition
+c       (obtained via a preceding call to the subroutine
+c       cqrdecom) to estimate the condition number of the
 c       complex matrix a
 c
 c                      Input parameters:
@@ -155,7 +180,7 @@ c                      Work arrays:
 c
 c  w - must be at least 4*n+4 real *8 locations in length
 c
-c  
+c
 c        . . . initialize the array to be used for forward iteration
 c
         call cqrsolve_rand(n*2,w)
@@ -227,20 +252,21 @@ c
 c
         subroutine cqrsolv(a,n,rhs,rcond)
         implicit complex *16 (a-h,o-z)
+        save
         complex *16 a(n,n),u(2,2),aa(2),rhs(1)
 c
         real *8 dmax,dmin,rcond,size22
 c
 c       This subroutine uses a version of QR-decomposition to solve
-c       the user-supplied system of linear algebraic equations, with 
-c       the complex matrix a and right-hand side rhs. Both the matrix 
+c       the user-supplied system of linear algebraic equations, with
+c       the complex matrix a and right-hand side rhs. Both the matrix
 c       a and the right-hand side rhs are destroyed in the process.
 c
-c       IMPORTANT NOTE: 
+c       IMPORTANT NOTE:
 C        THIS IS A PRIMITIVE ROUTINE IN THAT IT SOLVES THE SYSTEM
-C        WITH A SINGLE RIGHT-HAND SIDE, AND WILL PERFORM THE 
-C        QR DECOMPOSITION AGAIN AND AGAIN FOR EACH NEW RIGHT-HAND 
-C        SIDE. IT SHOULD NOT BE USED IN THIS REGIME! Instead, the 
+C        WITH A SINGLE RIGHT-HAND SIDE, AND WILL PERFORM THE
+C        QR DECOMPOSITION AGAIN AND AGAIN FOR EACH NEW RIGHT-HAND
+C        SIDE. IT SHOULD NOT BE USED IN THIS REGIME! Instead, the
 c        subroutines cqrdecom, cqrsolve (see) should be used
 c
 c                    Input parameters:
@@ -255,7 +281,7 @@ c
 c                    Output parameters:
 c
 c  x - the solution of the system
-c  rcond - a fairly crude estimate of the condition number of a       
+c  rcond - a fairly crude estimate of the condition number of a
 c
 c        . . . transpose the input matrix a
 c
@@ -271,7 +297,7 @@ c
         size22=size22+a(i,j)*conjg(a(i,j))
  1200 continue
  1400 continue
-c 
+c
 c       eliminate the upper right triangle
 c
         do 2000 i=1,n-1
@@ -305,12 +331,12 @@ c
         if(dmin .eq. 0) then
             rcond=-1
             return
-        endif 
+        endif
 c
         rcond=dmax/dmin
 c
         call cqrtrin(a,rhs,n)
-c  
+c
         return
         end
 c
@@ -320,13 +346,14 @@ c
 c
         subroutine cqrsolve(n,b,y,x)
         implicit complex *16 (a-h,o-z)
+        save
         dimension b(1),x(1),y(1)
 c
 c       This subroutine uses a version of QR-decomposition to solve
-c       the user-supplied system of complex linear algebraic equations. 
-c       The QR-decomposition is prepared by a prior call to the subroutine 
-c       cqrdecom (see); this subroutine has no known uses as a stand-alone 
-c       device. 
+c       the user-supplied system of complex linear algebraic equations.
+c       The QR-decomposition is prepared by a prior call to the subroutine
+c       cqrdecom (see); this subroutine has no known uses as a stand-alone
+c       device.
 c
 c                    Input parameters:
 c
@@ -353,7 +380,7 @@ c
         iz=ib+lb
         lz=n+2
 c
-c       . . . apply the inverse of the factored matrix to the 
+c       . . . apply the inverse of the factored matrix to the
 c             right-hand side
 c
         call cqrtrinv(b(ia),y,b(iz),n)
@@ -368,20 +395,21 @@ c
 c
         subroutine cqrsolve_adj(n,b,y,x)
         implicit real *8 (a-h,o-z)
+        save
         complex *16 b(1),x(1),y(1)
 c
-c       This subroutine uses a version of QR-decomposition to 
-c       solve the user-supplied system of complex linear 
+c       This subroutine uses a version of QR-decomposition to
+c       solve the user-supplied system of complex linear
 c       algebraic equations
 c
 c                   A^* (x)=y.                                         (1)
 c
-c       Please note that A^* in (1) above denotes the adjoint of 
-c       the  matrix A. Also, please note that the QR-decomposition 
-c       is prepared by a prior call to the subroutine cqrdecom (see); 
-c       this subroutine has no known uses as a stand-alone device. 
+c       Please note that A^* in (1) above denotes the adjoint of
+c       the  matrix A. Also, please note that the QR-decomposition
+c       is prepared by a prior call to the subroutine cqrdecom (see);
+c       this subroutine has no known uses as a stand-alone device.
 c       Also, please note that this subroutine is the companion to
-c       the subroutine cqrsolve (see), solving the system of linear 
+c       the subroutine cqrsolve (see), solving the system of linear
 c       equations
 c
 c                   A(x)=y.                                            (2)
@@ -423,17 +451,18 @@ c
 c
         subroutine cqrdecom(a,n,b,rcond)
         implicit complex *16 (a-h,o-z)
+        save
         dimension a(1),b(1)
 c
 c       This subroutine constructs a QR-decomposition of the complex
-c       user-supplied matrix a. It is expected that this decomposition 
-c       will be used by the subroutine cqrsolve (see) for the solution 
-c       of linear systems with the matrix a; this subroutine has no 
+c       user-supplied matrix a. It is expected that this decomposition
+c       will be used by the subroutine cqrsolve (see) for the solution
+c       of linear systems with the matrix a; this subroutine has no
 c       known uses as a stand-alone device.
 c
 c                    Input parameters:
 c
-c  a - the matrix to be QR-decomposed; not damaged by the subroutine 
+c  a - the matrix to be QR-decomposed; not damaged by the subroutine
 c       in any way
 c  n - the dimensionality of the matrix a
 c
@@ -441,7 +470,7 @@ c                    Output parameters:
 c
 c  b - the array containing the QR-decomposition of a; must be
 c       2*n**2+n+10 real *8 locations long
-c  rcond - a fairly crude estimate of the condition number of a       
+c  rcond - a fairly crude estimate of the condition number of a
 c
 c        . . . allocate memory
 c
@@ -469,6 +498,7 @@ c
 c
         subroutine cqrtrin_conjg(a,y,n)
         implicit complex *16 (a-h,o-z)
+        save
         complex *16 a(n,n),y(1)
 c
 c       apply the inverse of the trizngular matrix a to y
@@ -493,6 +523,7 @@ c
 c
         subroutine cqrtrin(a,y,n)
         implicit complex *16 (a-h,o-z)
+        save
         complex *16 a(n,n),y(1)
 c
 c       apply the inverse of the trizngular matrix a to y
@@ -517,6 +548,7 @@ c
 c
         subroutine cqrtrinv(a,y,x,n)
         implicit complex *16 (a-h,o-z)
+        save
         dimension a(n,n),x(1),y(1)
 c
 c       start the process
@@ -534,28 +566,32 @@ c
  1400 continue
         return
         end
-c 
+c
 c
 c
 c
 c
         subroutine cqrelim(a,n,b,rcond)
         implicit complex *16 (a-h,o-z)
+        save
         complex *16 a(n,n),u(2,2),aa(2),b(n,n)
 c
         real *8 dmax,dmin,rcond,size22
 c
 c       construct the unity matrix
 c
+        size22=0
         do 1400 i=1,n
         do 1200 j=1,n
 c
         b(j,i)=0
+c
+        size22=size22+a(j,i)*conjg(a(j,i))
  1200 continue
 c
         b(i,i)=1
  1400 continue
-c 
+c
 c       eliminate the upper right triangle
 c
         do 2000 i=1,n-1
@@ -590,7 +626,7 @@ c
         if(dmin .eq. 0) then
             rcond=-1
             return
-        endif 
+        endif
 c
         rcond=dmax/dmin
 c
@@ -631,6 +667,7 @@ c
 c
         subroutine cqrrotat(a,x,y,n,n0)
         implicit complex *16 (a-h,o-z)
+        save
         complex *16 a(2,2),x(1),y(1),d1,d2
 c
         do 1200 i=n0,n
@@ -651,6 +688,7 @@ c
 c
         subroutine cqrrotfn3(a,u,size22)
         implicit complex *16 (a-h,o-z)
+        save
         dimension a(2),u(2,2)
         real *8 size22,d
 c
@@ -731,8 +769,8 @@ c
 c
         subroutine cqrmatve(a,n,x,y)
         implicit complex *16 (a-h,o-z)
+        save
         dimension a(n,n),x(1),y(1)
-        complex *16 cd
 c
 c        apply the matrix a to the vector x obtaining y
 c
@@ -752,8 +790,8 @@ c
 c
         subroutine cqrmatve_adj(a,n,x,y)
         implicit complex *16 (a-h,o-z)
+        save
         dimension a(n,n),x(1),y(1)
-        complex *16 cd
 c
 c        apply the matrix a to the vector x obtaining y
 c
@@ -775,8 +813,8 @@ c
 c
         subroutine cqrsolve_rand(n,y)
         implicit real *8 (a-h,o-z)
-        dimension y(1)
         save
+        dimension y(1)
         data ifcalled/0/
 c
 c       generate pseudo-random numbers
@@ -802,7 +840,7 @@ c
 c
         return
 c
-c 
+c
 c
 c
         entry cqrsolve_rand_reset(x7)
