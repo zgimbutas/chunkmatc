@@ -35,10 +35,12 @@ ifeq ($(UNAME_S),Darwin)
   CC_F2C   ?= $(if $(HOMEBREW_GCCS),$(lastword $(HOMEBREW_GCCS)),gcc-14)
   MPFR_LIB ?= -L$(HOMEBREW_PREFIX)/lib -lmpfr
   GMP_LIB  ?= -L$(HOMEBREW_PREFIX)/lib -lgmp
+  LFLAGS   ?= -Wl,-stack_size,0x20000000
 else
   CC_F2C   ?= gcc
   MPFR_LIB ?= -lmpfr
   GMP_LIB  ?= -lgmp
+  LFLAGS   ?= 
 endif
 
 # gcc 15+ defaults to C23 where () means (void), which breaks f2c's
@@ -91,7 +93,7 @@ $(BUILDDIR)/%.o: $(F2C_LIBDIR)/%.c | $(BUILDDIR)
 	$(CC_F2C) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/$(PROJECT): $(OBJS)
-	$(CC_F2C) $(CFLAGS) -Wl,-stack_size,0x20000000 -o $@ $(OBJS) $(LDLIBS)
+	$(CC_F2C) $(CFLAGS) $(LFLAGS) -o $@ $(OBJS) $(LDLIBS)
 	@echo "  LINK $@"
 
 clean:

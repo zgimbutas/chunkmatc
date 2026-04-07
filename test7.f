@@ -288,7 +288,7 @@ c
         endif
 c
 c
-        ifsolve = 1
+        ifsolve = 2
 c
         if( ifsolve .eq. 1 ) then
 c
