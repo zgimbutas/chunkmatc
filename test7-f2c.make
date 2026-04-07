@@ -14,13 +14,21 @@ LIBF2C  = $(HOME)/repositories/f2c/libf2c-x86_64/libf2c.a
 
 # Portable defaults: pick a working gcc and MPFR/GMP path for the host OS.
 # - macOS: auto-detect highest Homebrew gcc-N (Apple clang lacks __float128).
+#          Use /opt/homebrew on arm64, /usr/local on Intel -- mixing them
+#          picks an x86_64 gcc-N on Apple Silicon and breaks linking against
+#          arm64 libf2c/mpfr/gmp.
 # - Linux: use system gcc; rely on default library search for mpfr/gmp.
 # Any of these can be overridden on the make command line.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-  HOMEBREW_GCCS := $(shell ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | sort -V)
+  UNAME_M := $(shell uname -m)
+  ifeq ($(UNAME_M),arm64)
+    HOMEBREW_PREFIX ?= /opt/homebrew
+  else
+    HOMEBREW_PREFIX ?= /usr/local
+  endif
+  HOMEBREW_GCCS := $(shell ls $(HOMEBREW_PREFIX)/bin/gcc-[0-9]* 2>/dev/null | sort -V)
   CC_F2C   ?= $(if $(HOMEBREW_GCCS),$(lastword $(HOMEBREW_GCCS)),gcc-14)
-  HOMEBREW_PREFIX := $(if $(wildcard /opt/homebrew/lib),/opt/homebrew,/usr/local)
   MPFR_LIB ?= -L$(HOMEBREW_PREFIX)/lib -lmpfr
   GMP_LIB  ?= -L$(HOMEBREW_PREFIX)/lib -lgmp
 else

@@ -12,11 +12,39 @@ F2C     = $(HOME)/linux/repositories/f2c/src/f2c
 F2C_INC = $(HOME)/linux/repositories/f2c
 LIBF2C  = $(HOME)/repositories/f2c/libf2c-x86_64/libf2c.a
 
-CC_F2C  = gcc-14
-CFLAGS  = -O3 -march=native -I$(F2C_INC)
+# Portable defaults: pick a working gcc and MPFR/GMP path for the host OS.
+# - macOS: auto-detect highest Homebrew gcc-N (Apple clang lacks __float128).
+#          Use /opt/homebrew on arm64, /usr/local on Intel -- mixing them
+#          picks an x86_64 gcc-N on Apple Silicon and breaks linking against
+#          arm64 libf2c/mpfr/gmp.
+# - Linux: use system gcc; rely on default library search for mpfr/gmp.
+# Any of these can be overridden on the make command line.
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  UNAME_M := $(shell uname -m)
+  ifeq ($(UNAME_M),arm64)
+    HOMEBREW_PREFIX ?= /opt/homebrew
+  else
+    HOMEBREW_PREFIX ?= /usr/local
+  endif
+  HOMEBREW_GCCS := $(shell ls $(HOMEBREW_PREFIX)/bin/gcc-[0-9]* 2>/dev/null | sort -V)
+  CC_F2C   ?= $(if $(HOMEBREW_GCCS),$(lastword $(HOMEBREW_GCCS)),gcc-14)
+  MPFR_LIB ?= -L$(HOMEBREW_PREFIX)/lib -lmpfr
+  GMP_LIB  ?= -L$(HOMEBREW_PREFIX)/lib -lgmp
+else
+  CC_F2C   ?= gcc
+  MPFR_LIB ?= -lmpfr
+  GMP_LIB  ?= -lgmp
+endif
 
-MPFR_LIB = -L/opt/homebrew/Cellar/mpfr/4.2.2/lib -lmpfr
-GMP_LIB  = -L/opt/homebrew/Cellar/gmp/6.3.0/lib -lgmp
+# gcc 15+ defaults to C23 where () means (void), which breaks f2c's
+# K&R-style extern declarations.  Force gnu17 in that case.
+GCC_MAJOR := $(shell $(CC_F2C) -dumpversion 2>/dev/null | cut -d. -f1)
+ifeq ($(shell [ "$(GCC_MAJOR)" -ge 15 ] 2>/dev/null && echo y),y)
+  GCC_STD := -std=gnu17
+endif
+
+CFLAGS  = -O3 -march=native $(GCC_STD) -I$(F2C_INC)
 LDLIBS   = $(LIBF2C) $(MPFR_LIB) $(GMP_LIB) -lquadmath -lm
 
 SRCDIR   = .
