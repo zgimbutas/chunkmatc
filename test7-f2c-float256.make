@@ -1,14 +1,16 @@
 #
-#  test7-f2c.make -- build test7 via f2c + gcc
+#  test7-f2c-float256.make -- build test7 via f2c + gcc with float256 (REAL*32)
 #
 #  Usage:
-#    make -f test7-f2c.make
-#    make -f test7-f2c.make clean
+#    make -f test7-f2c-float256.make
+#    make -f test7-f2c-float256.make run
+#    make -f test7-f2c-float256.make clean
 #
 
 PROJECT = int2
 
 F2C     = $(HOME)/linux/repositories/f2c/src/f2c
+F2CFLAGS = -freal-8-real-32
 F2C_INC = $(HOME)/linux/repositories/f2c
 LIBF2C  = $(HOME)/repositories/f2c/libf2c-x86_64/libf2c.a
 
@@ -36,12 +38,12 @@ ifeq ($(shell [ "$(GCC_MAJOR)" -ge 15 ] 2>/dev/null && echo y),y)
   GCC_STD := -std=gnu17
 endif
 
-CFLAGS  = -O3 -march=native $(GCC_STD) -I$(F2C_INC)
-LDLIBS   = $(LIBF2C) $(MPFR_LIB) $(GMP_LIB) -lquadmath -lm
+CFLAGS  = -O3 -march=native -DF2C_FLOAT128 -DF2C_FLOAT256 $(GCC_STD) -I$(F2C_INC)
+LDLIBS  = $(LIBF2C) $(MPFR_LIB) $(GMP_LIB) -lquadmath -lm
 
 SRCDIR   = .
 LIBDIR   = $(HOME)/develop/lib
-BUILDDIR = _f2c_build
+BUILDDIR = _f2c_build_float256
 
 FSRCS = test7.f chunkmatc.f inter2dn.f hank103.f cadavect.f \
         hqsuppquad.f cgmres6-rel.f cqrsolve.f legeexps.f prini.f \
@@ -64,11 +66,11 @@ $(BUILDDIR):
 
 $(BUILDDIR)/%.c: $(SRCDIR)/%.f | $(BUILDDIR)
 	@cp $< $(BUILDDIR)/$(notdir $<)
-	@cd $(BUILDDIR) && $(F2C) $(notdir $<) 2>/dev/null; rm -f $(notdir $<)
+	@cd $(BUILDDIR) && $(F2C) $(F2CFLAGS) $(notdir $<) 2>/dev/null; rm -f $(notdir $<)
 
 $(BUILDDIR)/%.c: $(LIBDIR)/%.f | $(BUILDDIR)
 	@cp $< $(BUILDDIR)/$(notdir $<)
-	@cd $(BUILDDIR) && $(F2C) $(notdir $<) 2>/dev/null; rm -f $(notdir $<)
+	@cd $(BUILDDIR) && $(F2C) $(F2CFLAGS) $(notdir $<) 2>/dev/null; rm -f $(notdir $<)
 
 $(BUILDDIR)/%.o: $(BUILDDIR)/%.c
 	$(CC_F2C) $(CFLAGS) -c $< -o $@
