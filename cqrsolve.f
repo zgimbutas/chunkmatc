@@ -7,30 +7,6 @@ cc SPDX-License-Identifier: BSD-3-Clause-Modification
 cc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c   Fix history
-c   -----------
-c   2026-04-07  cqrelim: added missing initialization of size22 before
-c               the inner-loop call to cqrrotfn3.  Background: when the
-c               inner call was switched from cqrrotfn2 (which the sister
-c               routine cqrsolv still uses) to cqrrotfn3, the size22
-c               sum-of-squared-moduli setup was dropped.  cqrrotfn3 still
-c               tests  if (d .lt. size22*1.0d-66)  as its degenerate-2-
-c               vector check, so the missing setup left size22 at
-c               whatever happened to be in storage.  Under the F77 de
-c               facto convention of static storage for locals that was
-c               a harmless BSS zero (the branch is d < 0, never true
-c               for a sum of squares).  Under auto storage (f2c -a, as
-c               forced by -fomp) the bug surfaced; with f2c's REAL*32/
-c               REAL*64 (MPFR-backed struct types) uninitialized bytes
-c               reinterpret as huge MPFR values and the degenerate-case
-c               branch fires every iteration, collapsing QR to identity.
-c               Detected with f2c -a -freal-8-real-32 (error 0.247
-c               instead of ~1e-37).  The 1.0d-66 threshold itself is
-c               fine up to quad precision but is not tight at float256/
-c               float512; left as-is for now.
-c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
 c        This is the end of the debugging code and the beginning of the
 c        linear solver proper
 c
